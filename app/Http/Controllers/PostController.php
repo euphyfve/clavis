@@ -138,7 +138,7 @@ class PostController extends Controller
         ]);
     }
 
-    public function destroy(Post $post)
+    public function destroy(Request $request, Post $post)
     {
         $this->authorize('delete', $post);
 
@@ -148,6 +148,12 @@ class PostController extends Controller
 
         $post->delete();
 
+        // If called via Inertia, respond with a redirect so Inertia gets a valid response
+        if ($request->header('X-Inertia')) {
+            return back(303)->with('success', 'Post deleted successfully');
+        }
+
+        // Otherwise, JSON for API consumers
         return response()->json(['message' => 'Post deleted successfully']);
     }
 

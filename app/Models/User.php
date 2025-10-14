@@ -26,6 +26,10 @@ class User extends Authenticatable
         'avatar',
         'bio',
         'seen_intro',
+        'is_admin',
+        'is_banned',
+        'banned_at',
+        'ban_reason',
     ];
 
     /**
@@ -49,6 +53,9 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'seen_intro' => 'boolean',
+            'is_admin' => 'boolean',
+            'is_banned' => 'boolean',
+            'banned_at' => 'datetime',
         ];
     }
 
@@ -70,5 +77,45 @@ class User extends Authenticatable
     public function foundedTopics(): HasMany
     {
         return $this->hasMany(Topic::class, 'founder_id');
+    }
+
+    /**
+     * Check if user is admin
+     */
+    public function isAdmin(): bool
+    {
+        return $this->is_admin;
+    }
+
+    /**
+     * Check if user is banned
+     */
+    public function isBanned(): bool
+    {
+        return $this->is_banned;
+    }
+
+    /**
+     * Ban this user
+     */
+    public function ban(string $reason = null): void
+    {
+        $this->update([
+            'is_banned' => true,
+            'banned_at' => now(),
+            'ban_reason' => $reason,
+        ]);
+    }
+
+    /**
+     * Unban this user
+     */
+    public function unban(): void
+    {
+        $this->update([
+            'is_banned' => false,
+            'banned_at' => null,
+            'ban_reason' => null,
+        ]);
     }
 }

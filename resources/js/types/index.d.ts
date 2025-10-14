@@ -4,6 +4,8 @@ export interface User {
     email: string;
     email_verified_at?: string;
     avatar?: string | null;
+    is_admin?: boolean;
+    is_banned?: boolean;
 }
 
 export type PageProps<

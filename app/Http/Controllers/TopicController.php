@@ -67,22 +67,58 @@ class TopicController extends Controller
     {
         $filter = $request->get('filter', 'hot');
         
+        // Get top 10 best hashtags based on daily activity
+        $topHashtags = Topic::with('founder')
+            ->where('daily_post_count', '>', 0)
+            ->orderBy('daily_post_count', 'desc')
+            ->orderBy('daily_view_count', 'desc')
+            ->limit(10)
+            ->get();
+
+        // Get 5 newest hashtags created today
+        $newHashtags = Topic::with('founder')
+            ->whereDate('created_at', today())
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        // Merge and remove duplicates (in case a new hashtag is also in top 10)
+        $allHashtags = $topHashtags->merge($newHashtags)->unique('id')->take(15);
+
+        $topics = $allHashtags->map(function ($topic) {
+            return [
+                'id' => $topic->id,
+                'name' => $topic->name,
+                'slug' => $topic->slug,
+                'count' => $topic->post_count,
+                'daily_count' => $topic->daily_post_count,
+                'view_count' => $topic->view_count,
+                'is_new' => $topic->isNew(),
+                'founder' => $topic->founder ? [
+                    'name' => $topic->founder->name,
+                ] : null,
+            ];
+        });
+
+        return response()->json($topics);
+    }
+
+    /**
+     * Get all topics with advanced filtering (for admin and detailed views)
+     */
+    public function allTopics(Request $request)
+    {
+        $filter = $request->get('filter', 'hot');
+        
         $query = Topic::with('founder')
             ->select('topics.*')
             ->selectRaw('topics.post_count as count');
 
         switch ($filter) {
             case 'hot':
-                // Hot: Based on recent activity (posts in last 7 days + total posts)
-                $query->selectRaw('(
-                    SELECT COUNT(*) 
-                    FROM posts 
-                    WHERE posts.id IN (
-                        SELECT post_id FROM post_topic WHERE topic_id = topics.id
-                    ) 
-                    AND posts.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-                ) as recent_posts')
-                ->orderByRaw('recent_posts DESC, post_count DESC');
+                // Hot: Based on daily activity
+                $query->orderBy('daily_post_count', 'desc')
+                    ->orderBy('daily_view_count', 'desc');
                 break;
                 
             case 'trending':
@@ -91,9 +127,8 @@ class TopicController extends Controller
                 break;
                 
             case 'new':
-                // New: Recently created topics with activity
-                $query->where('created_at', '>=', now()->subDays(30))
-                    ->orderBy('created_at', 'desc');
+                // New: Recently created topics
+                $query->orderBy('created_at', 'desc');
                 break;
         }
 
@@ -106,7 +141,9 @@ class TopicController extends Controller
                     'name' => $topic->name,
                     'slug' => $topic->slug,
                     'count' => $topic->post_count,
+                    'daily_count' => $topic->daily_post_count,
                     'view_count' => $topic->view_count,
+                    'is_new' => $topic->isNew(),
                     'founder' => $topic->founder ? [
                         'name' => $topic->founder->name,
                     ] : null,

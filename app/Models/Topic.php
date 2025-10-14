@@ -15,6 +15,9 @@ class Topic extends Model
         'founder_id',
         'post_count',
         'view_count',
+        'daily_post_count',
+        'daily_view_count',
+        'last_reset_at',
         'category',
         'mood',
     ];
@@ -22,6 +25,9 @@ class Topic extends Model
     protected $casts = [
         'post_count' => 'integer',
         'view_count' => 'integer',
+        'daily_post_count' => 'integer',
+        'daily_view_count' => 'integer',
+        'last_reset_at' => 'datetime',
     ];
 
     protected static function boot()
@@ -48,10 +54,32 @@ class Topic extends Model
     public function incrementPostCount(): void
     {
         $this->increment('post_count');
+        $this->increment('daily_post_count');
     }
 
     public function incrementViewCount(): void
     {
         $this->increment('view_count');
+        $this->increment('daily_view_count');
+    }
+
+    /**
+     * Reset daily counters
+     */
+    public function resetDailyStats(): void
+    {
+        $this->update([
+            'daily_post_count' => 0,
+            'daily_view_count' => 0,
+            'last_reset_at' => now(),
+        ]);
+    }
+
+    /**
+     * Check if this is a new topic (created today)
+     */
+    public function isNew(): bool
+    {
+        return $this->created_at->isToday();
     }
 }

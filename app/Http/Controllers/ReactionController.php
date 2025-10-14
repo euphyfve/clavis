@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Post;
 use App\Models\Reaction;
 use Illuminate\Http\Request;
@@ -41,6 +42,15 @@ class ReactionController extends Controller
             $user->stats->addXP(2);
         }
 
+        // If this is an Inertia request, redirect back so Inertia gets a proper response
+        if ($request->header('X-Inertia')) {
+            return back(303)->with('reaction', [
+                'action' => $action,
+                'reaction_count' => $post->fresh()->reaction_count,
+            ]);
+        }
+
+        // Non-Inertia/API consumers still receive JSON
         return response()->json([
             'action' => $action,
             'reaction_count' => $post->fresh()->reaction_count,
