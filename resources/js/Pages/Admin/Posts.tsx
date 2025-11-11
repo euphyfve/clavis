@@ -1,4 +1,4 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, router } from '@inertiajs/react';
 import { FileText, Trash2, Search } from 'lucide-react';
 import { useState } from 'react';
@@ -46,34 +46,34 @@ export default function AdminPosts({ posts }: { posts: PaginatedPosts }) {
     };
 
     return (
-        <AuthenticatedLayout
+        <AdminLayout
             header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800 flex items-center gap-2">
-                    <FileText className="w-6 h-6" />
+                <h2 className="text-2xl font-bold leading-tight text-slate-100 flex items-center gap-2">
+                    <FileText className="w-6 h-6 text-emerald-400" />
                     Post Management
                 </h2>
             }
         >
             <Head title="Post Management" />
 
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
+            <div className="py-10">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
                     {/* Search */}
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                    <div className="bg-dark-700/60 backdrop-blur-sm border border-accent-primary/20 rounded-xl p-6">
                         <form onSubmit={handleSearch} className="flex gap-4">
                             <div className="flex-1 relative">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
                                 <input
                                     type="text"
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     placeholder="Search posts by content..."
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full pl-10 pr-4 py-2 rounded-lg bg-dark-800 border border-accent-secondary/30 text-slate-100 placeholder-slate-400 focus:outline-none focus:border-accent-secondary focus:ring-2 focus:ring-accent-secondary/20"
                                 />
                             </div>
                             <button
                                 type="submit"
-                                className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition"
+                                className="px-6 py-2 bg-gradient-to-r from-accent-primary to-accent-purple text-white rounded-lg transition hover:opacity-90"
                             >
                                 Search
                             </button>
@@ -83,24 +83,24 @@ export default function AdminPosts({ posts }: { posts: PaginatedPosts }) {
                     {/* Posts List */}
                     <div className="space-y-4">
                         {posts.data.map((post) => (
-                            <div key={post.id} className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                            <div key={post.id} className="bg-dark-700/60 backdrop-blur-sm border border-accent-primary/20 rounded-xl p-6">
                                 <div className="flex justify-between items-start">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <span className="font-semibold text-gray-900">{post.user.name}</span>
-                                            <span className="text-sm text-gray-500">
+                                            <span className="font-semibold text-slate-100">{post.user.name}</span>
+                                            <span className="text-sm text-slate-400">
                                                 {new Date(post.created_at).toLocaleString()}
                                             </span>
                                         </div>
-                                        <p className="text-gray-700 mb-3">{post.content}</p>
+                                        <p className="text-slate-100 mb-3 whitespace-pre-wrap leading-relaxed">{post.content}</p>
                                         {post.image_path && (
                                             <img
                                                 src={`/storage/${post.image_path}`}
                                                 alt="Post image"
-                                                className="max-w-md rounded-lg mb-3"
+                                                className="max-w-md rounded-lg mb-3 border border-accent-primary/20"
                                             />
                                         )}
-                                        <div className="flex gap-4 text-sm text-gray-500">
+                                        <div className="flex gap-4 text-sm text-slate-400">
                                             <span>❤️ {post.reaction_count} reactions</span>
                                             <span>💬 {post.comment_count} comments</span>
                                         </div>
@@ -109,7 +109,7 @@ export default function AdminPosts({ posts }: { posts: PaginatedPosts }) {
                                                 {post.topics.map((topic) => (
                                                     <span
                                                         key={topic.id}
-                                                        className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded"
+                                                        className="px-2 py-1 text-xs bg-accent-secondary/10 text-accent-secondary rounded border border-accent-secondary/30"
                                                     >
                                                         #{topic.name}
                                                     </span>
@@ -119,7 +119,7 @@ export default function AdminPosts({ posts }: { posts: PaginatedPosts }) {
                                     </div>
                                     <button
                                         onClick={() => handleDelete(post)}
-                                        className="text-red-600 hover:text-red-900 ml-4"
+                                        className="text-red-400 hover:opacity-80 ml-4"
                                         title="Delete Post"
                                     >
                                         <Trash2 className="w-5 h-5" />
@@ -131,9 +131,9 @@ export default function AdminPosts({ posts }: { posts: PaginatedPosts }) {
 
                     {/* Pagination */}
                     {posts.last_page > 1 && (
-                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg px-6 py-4">
+                        <div className="px-6 py-4 border border-accent-primary/20 bg-dark-800/60 rounded-xl">
                             <div className="flex justify-between items-center">
-                                <div className="text-sm text-gray-500">
+                                <div className="text-sm text-slate-400">
                                     Page {posts.current_page} of {posts.last_page}
                                 </div>
                                 <div className="flex gap-2">
@@ -144,8 +144,8 @@ export default function AdminPosts({ posts }: { posts: PaginatedPosts }) {
                                             disabled={!link.url}
                                             className={`px-3 py-1 rounded ${
                                                 link.active
-                                                    ? 'bg-blue-500 text-white'
-                                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                    ? 'bg-gradient-to-r from-accent-primary to-accent-purple text-white'
+                                                    : 'bg-dark-700 text-slate-300 hover:bg-dark-600 border border-accent-primary/20'
                                             } ${!link.url ? 'opacity-50 cursor-not-allowed' : ''}`}
                                             dangerouslySetInnerHTML={{ __html: link.label }}
                                         />
@@ -156,6 +156,6 @@ export default function AdminPosts({ posts }: { posts: PaginatedPosts }) {
                     )}
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </AdminLayout>
     );
 }
